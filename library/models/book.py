@@ -3,7 +3,7 @@ from enum import Enum
 
 from library.models import BaseModel
 from marshmallow import Schema, fields, validate, ValidationError, validates
-from datetime import datetime
+from datetime import datetime, timezone
 
 from library.models.author import AuthorSchema
 
@@ -54,8 +54,8 @@ class Book(BaseModel):
 class BookSchema(Schema):
     id = fields.UUID(required=True, default=lambda: str(uuid.uuid4()), dump_only=True)
     title = fields.String(required=True, validate=validate.Length(min=1, max=100))
-    author = fields.Nested(AuthorSchema, only=['first_name', 'second_name'])
-    year = fields.Integer(validate=validate_year, required=True)
+    author = fields.Nested(AuthorSchema(only=['first_name', 'second_name']))
+    year = fields.Integer(required=True)
     short_description = fields.String(required=False, allow_none=True)
     long_description = fields.String(required=False, allow_none=True)
     categories = fields.List(fields.String(), required=False, allow_none=True)
@@ -63,8 +63,8 @@ class BookSchema(Schema):
     audiobook = fields.Boolean(default=False, required=False)
 
     @validates('year')
-    def validate_year(self, value):
-        current_year = datetime.now().year
+    def validate_publish_year(self, value):
+        current_year = datetime.now(timezone.utc).year
         if value > current_year:
             raise ValidationError(f"Year must not be greater than the current year ({current_year}).")
         if value <= 0:

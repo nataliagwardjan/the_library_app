@@ -4,8 +4,8 @@ import uuid
 class BaseModel:
     __slots__ = ['_id']
 
-    def __init__(self, model_id: uuid = uuid.uuid4()):
-        self._id = model_id
+    def __init__(self, model_id: uuid = None):
+        self._id = model_id or uuid.uuid4()
 
     @property
     def id(self):

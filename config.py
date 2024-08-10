@@ -26,3 +26,4 @@ class Config:
     SECRET_KEY = os.environ.get('FLASK_SECRET_KEY')
     URL_PREFIX = os.environ.get('URL_PREFIX')
     PER_PAGE = 10
+    DEFAULT_BORROW_TIME_IN_MONTH = 1

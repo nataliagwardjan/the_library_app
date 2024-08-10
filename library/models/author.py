@@ -19,11 +19,6 @@ class Author(BaseModel):
         self.biography = biography
 
 
-def validate_date(value: date, description: str):
-    if value > datetime.now().date():
-        raise ValidationError(f"{description} must be before or equal to {datetime.now().date()}")
-
-
 class AuthorSchema(Schema):
     id = fields.UUID(required=True, default=lambda: str(uuid.uuid4()), dump_only=True)
     first_name = fields.String(required=True, validate=validate.Length(min=1, max=50))
@@ -33,13 +28,18 @@ class AuthorSchema(Schema):
     biography = fields.String(required=False, allow_none=True)
     books = fields.List(fields.Nested(BookSchema(exclude=['author'])))
 
+    @staticmethod
+    def validate_date(value: date, description: str):
+        if value > datetime.now().date():
+            raise ValidationError(f"{description} must be before or equal to {datetime.now().date()}")
+
     @validates('birth_date')
     def validate_birth_date(self, value):
-        validate_date(value, 'Birth date')
+        AuthorSchema.validate_date(value, 'Birth date')
 
     @validates('death_date')
     def validate_death_date(self, value):
-        validate_date(value, 'Death date')
+        AuthorSchema.validate_date(value, 'Death date')
 
     @validates_schema
     def validate_dates(self, data, **kwargs):
